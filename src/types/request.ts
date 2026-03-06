@@ -29,6 +29,7 @@ export interface RequestRecord {
   data_types: string[];
   user_count: string;
   data_leaves_company: boolean | null;
+  requires_system_access: boolean | null;
   estimated_cost: string | null;
   replaces_tool: string | null;
   existing_docs_url: string | null;
@@ -51,6 +52,7 @@ export interface CreateRequestInput {
   data_types: string[];
   user_count: string;
   data_leaves_company?: boolean | null;
+  requires_system_access?: boolean | null;
   estimated_cost?: string;
   replaces_tool?: string;
   existing_docs_url?: string;

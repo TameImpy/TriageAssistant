@@ -10,6 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const DATA_TYPES = [
   "Personal data (names, emails, etc.)",
@@ -24,6 +31,34 @@ const DATA_TYPES = [
 
 const USER_COUNTS = ["Just me", "2-5 people", "6-20 people", "21-50 people", "50+ people"];
 
+const TEAMS = [
+  "Advertising",
+  "Audience Engagement",
+  "Commercial Growth",
+  "Contract & Customer",
+  "Customer Marketing & Subscriptions",
+  "Digital Content",
+  "Digital Growth",
+  "Enterprise Systems",
+  "Finance",
+  "Food Group",
+  "Gardeners' World",
+  "History",
+  "Immediate Live",
+  "Leadership Team",
+  "Legal",
+  "Licensing & International",
+  "Nutracheck",
+  "Parenting",
+  "People Team",
+  "Podcasts",
+  "Product & Tech",
+  "Production",
+  "Radio Times",
+  "SEO & Audience Development",
+  "Youth & Children's",
+];
+
 const FormSchema = z.object({
   tool_name: z.string().min(1, "Tool name is required"),
   tool_url: z.string().url("Enter a valid URL").optional().or(z.literal("")),
@@ -36,6 +71,9 @@ const FormSchema = z.object({
   data_types: z.array(z.string()).min(1, "Select at least one data type"),
   user_count: z.string().min(1, "Select number of users"),
   data_leaves_company: z
+    .enum(["yes", "no", "unsure"])
+    .optional(),
+  requires_system_access: z
     .enum(["yes", "no", "unsure"])
     .optional(),
   estimated_cost: z.string().optional(),
@@ -92,6 +130,7 @@ export function IntakeForm() {
               : values.data_leaves_company === "no"
               ? false
               : null,
+          requires_system_access: values.requires_system_access ?? "unsure",
         }),
       });
 
@@ -164,7 +203,18 @@ export function IntakeForm() {
             </div>
             <div>
               <Label htmlFor="requester_team">Team *</Label>
-              <Input id="requester_team" {...register("requester_team")} placeholder="e.g. Engineering, Editorial" className="mt-1" />
+              <Select
+                onValueChange={(v) => setValue("requester_team", v, { shouldValidate: true })}
+              >
+                <SelectTrigger id="requester_team" className="mt-1">
+                  <SelectValue placeholder="Select your team…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TEAMS.map((team) => (
+                    <SelectItem key={team} value={team}>{team}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {errors.requester_team && <p className="text-xs text-destructive mt-1">{errors.requester_team.message}</p>}
             </div>
           </div>
@@ -286,6 +336,32 @@ export function IntakeForm() {
                     type="button"
                     onClick={() =>
                       setValue("data_leaves_company", option, { shouldValidate: true })
+                    }
+                    className={`px-4 py-2 rounded-lg border text-sm transition-colors ${
+                      selected
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "border-border hover:bg-muted"
+                    }`}
+                  >
+                    {labels[option]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <Label>Does this tool require installation or system/network access on company devices?</Label>
+            <div className="flex gap-3 mt-2">
+              {(["yes", "no", "unsure"] as const).map((option) => {
+                const selected = watch("requires_system_access") === option;
+                const labels = { yes: "Yes", no: "No", unsure: "Not sure" };
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() =>
+                      setValue("requires_system_access", option, { shouldValidate: true })
                     }
                     className={`px-4 py-2 rounded-lg border text-sm transition-colors ${
                       selected

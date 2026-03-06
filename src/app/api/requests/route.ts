@@ -16,6 +16,7 @@ const CreateRequestSchema = z.object({
     .min(1, "Select at least one data type"),
   user_count: z.string().min(1, "User count is required"),
   data_leaves_company: z.boolean().nullable().optional(),
+  requires_system_access: z.enum(["yes", "no", "unsure"]).optional(),
   estimated_cost: z.string().optional(),
   replaces_tool: z.string().optional(),
   existing_docs_url: z
@@ -38,10 +39,17 @@ export async function POST(req: NextRequest) {
     }
 
     const data = parsed.data;
+    const requires_system_access =
+      data.requires_system_access === "yes"
+        ? true
+        : data.requires_system_access === "no"
+        ? false
+        : null;
     const record = createRequest({
       ...data,
       tool_url: data.tool_url || undefined,
       existing_docs_url: data.existing_docs_url || undefined,
+      requires_system_access,
     });
 
     return NextResponse.json({ id: record.id, status: record.status }, { status: 201 });
@@ -68,6 +76,7 @@ export async function GET() {
         recommendation: r.recommendation,
         created_at: r.created_at,
         intake_ready: r.intake_ready,
+        requires_system_access: r.requires_system_access,
       }))
     );
   } catch (err) {

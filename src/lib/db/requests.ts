@@ -29,6 +29,10 @@ function toRecord(row: Record<string, unknown>): RequestRecord {
       row.data_leaves_company === null
         ? null
         : (row.data_leaves_company as number) === 1,
+    requires_system_access:
+      row.requires_system_access === null || row.requires_system_access === undefined
+        ? null
+        : (row.requires_system_access as number) === 1,
     estimated_cost: row.estimated_cost as string | null,
     replaces_tool: row.replaces_tool as string | null,
     existing_docs_url: row.existing_docs_url as string | null,
@@ -56,12 +60,12 @@ export function createRequest(input: CreateRequestInput): RequestRecord {
     `INSERT INTO requests (
       id, created_at, updated_at, status,
       tool_name, tool_url, requester_name, requester_team, requester_role,
-      business_justification, data_types, user_count, data_leaves_company,
+      business_justification, data_types, user_count, data_leaves_company, requires_system_access,
       estimated_cost, replaces_tool, existing_docs_url
     ) VALUES (
       ?, ?, ?, 'draft',
       ?, ?, ?, ?, ?,
-      ?, ?, ?, ?,
+      ?, ?, ?, ?, ?,
       ?, ?, ?
     )`
   ).run(
@@ -79,6 +83,11 @@ export function createRequest(input: CreateRequestInput): RequestRecord {
     input.data_leaves_company === undefined || input.data_leaves_company === null
       ? null
       : input.data_leaves_company
+      ? 1
+      : 0,
+    input.requires_system_access === undefined || input.requires_system_access === null
+      ? null
+      : input.requires_system_access
       ? 1
       : 0,
     input.estimated_cost ?? null,

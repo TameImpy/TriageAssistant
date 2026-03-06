@@ -10,6 +10,13 @@ export function buildRequestContext(request: RequestRecord): string {
       ? "Yes"
       : "No";
 
+  const systemAccess =
+    request.requires_system_access === null
+      ? "Unknown"
+      : request.requires_system_access
+      ? "Yes"
+      : "No";
+
   const intakeAnswers =
     request.intake_questions && request.intake_answers
       ? request.intake_questions
@@ -32,6 +39,7 @@ export function buildRequestContext(request: RequestRecord): string {
 **Data Types Processed:** ${request.data_types.join(", ")}
 **Number of Users:** ${request.user_count}
 **Data Leaves Company Systems:** ${dataLeaves}
+**System/Network Access Required:** ${systemAccess}
 **Estimated Cost:** ${request.estimated_cost ?? "Not provided"}
 **Replaces Existing Tool:** ${request.replaces_tool ?? "No"}
 **Vendor Documentation URL:** ${request.existing_docs_url ?? "Not provided"}

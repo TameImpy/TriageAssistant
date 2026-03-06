@@ -18,11 +18,30 @@ export function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Fine-grained catalogue API auth
+  if (pathname.startsWith("/api/catalogue")) {
+    // Public: GET active tools list
+    if (pathname === "/api/catalogue" && req.method === "GET") {
+      return NextResponse.next();
+    }
+    // Public: employee submit a catalogue request
+    if (pathname === "/api/catalogue/requests" && req.method === "POST") {
+      return NextResponse.next();
+    }
+    // Public: employee check their own catalogue request status
+    if (pathname.match(/^\/api\/catalogue\/requests\/[^/]+$/) && req.method === "GET") {
+      return NextResponse.next();
+    }
+    // Everything else (reviewer list, PATCH, tools CRUD) requires auth
+    return requireAuth(req);
+  }
+
   // Allow employee-facing pages
   if (
     pathname === "/" ||
     pathname.startsWith("/submit") ||
     pathname.startsWith("/login") ||
+    pathname.startsWith("/catalogue") ||
     pathname.match(/^\/requests\/[^/]+\/(status|clarify)/)
   ) {
     return NextResponse.next();

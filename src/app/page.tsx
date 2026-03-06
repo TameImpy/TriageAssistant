@@ -28,41 +28,61 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid gap-4">
-          <Card className="border-2 border-primary/20 hover:border-primary/50 transition-colors">
-            <CardContent className="pt-6 pb-6 flex items-center justify-between">
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Card className="border-2 border-green-200 flex flex-col shadow-sm hover:shadow-lg hover:-translate-y-1 hover:scale-[1.015] transition-all duration-200">
+            <CardContent className="pt-6 pb-6 flex flex-col gap-4 flex-1">
               <div>
-                <h2 className="text-lg font-semibold">Submit a New Request</h2>
+                <div className="text-xs font-semibold uppercase tracking-wide text-green-600 mb-1">Fast track</div>
+                <h2 className="text-lg font-semibold">Browse Approved Tools</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Takes 3–5 minutes. You may be asked a few follow-up questions.
+                  Fast-track access for tools already reviewed and approved by IT.
                 </p>
               </div>
-              <Link href="/submit">
-                <Button size="lg">Get Started</Button>
-              </Link>
+              <div className="mt-auto">
+                <Link href="/catalogue">
+                  <Button size="lg" className="w-full bg-green-600 hover:bg-green-700 text-white">Browse Catalogue</Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="pt-4 pb-4 text-center">
-                <div className="text-2xl font-bold text-primary mb-1">5</div>
-                <div className="text-xs text-muted-foreground">AI Reviewers</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-4 pb-4 text-center">
-                <div className="text-2xl font-bold text-primary mb-1">4</div>
-                <div className="text-xs text-muted-foreground">Review Phases</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-4 pb-4 text-center">
-                <div className="text-2xl font-bold text-primary mb-1">&lt;2m</div>
-                <div className="text-xs text-muted-foreground">Decision Read Time</div>
-              </CardContent>
-            </Card>
-          </div>
+          <Card className="border-2 border-primary/20 flex flex-col shadow-sm hover:shadow-lg hover:-translate-y-1 hover:scale-[1.015] transition-all duration-200">
+            <CardContent className="pt-6 pb-6 flex flex-col gap-4 flex-1">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-primary mb-1">Full AI review</div>
+                <h2 className="text-lg font-semibold">Request a New Tool</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Submit for a full multi-agent review — security, legal, engineering, and business perspectives.
+                </p>
+              </div>
+              <div className="mt-auto">
+                <Link href="/submit">
+                  <Button size="lg" className="w-full">Get Started</Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="pt-4 pb-4 text-center">
+              <div className="text-2xl font-bold text-primary mb-1">5</div>
+              <div className="text-xs text-muted-foreground">AI Reviewers</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4 pb-4 text-center">
+              <div className="text-2xl font-bold text-primary mb-1">4</div>
+              <div className="text-xs text-muted-foreground">Review Phases</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4 pb-4 text-center">
+              <div className="text-2xl font-bold text-primary mb-1">&lt;2m</div>
+              <div className="text-xs text-muted-foreground">Decision Read Time</div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="text-center space-y-2">

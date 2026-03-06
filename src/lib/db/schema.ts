@@ -49,3 +49,38 @@ export const CREATE_AGENT_CONFIGS_TABLE = `
     updated_at INTEGER NOT NULL
   )
 `;
+
+export const CREATE_APPROVED_TOOLS_TABLE = `
+  CREATE TABLE IF NOT EXISTS approved_tools (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    category TEXT NOT NULL,
+    vendor_url TEXT,
+    training_url TEXT,
+    training_notes TEXT,
+    added_by TEXT NOT NULL,
+    added_at INTEGER NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1
+  )
+`;
+
+export const CREATE_CATALOGUE_REQUESTS_TABLE = `
+  CREATE TABLE IF NOT EXISTS catalogue_requests (
+    id TEXT PRIMARY KEY,
+    tool_id TEXT NOT NULL REFERENCES approved_tools(id),
+    tool_name TEXT NOT NULL,
+    requester_name TEXT NOT NULL,
+    requester_team TEXT NOT NULL,
+    requester_role TEXT,
+    business_reason TEXT NOT NULL,
+    user_count INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    reviewer_note TEXT,
+    created_at INTEGER NOT NULL,
+    resolved_at INTEGER
+  )
+`;
+
+export const ADD_REQUIRES_SYSTEM_ACCESS_COLUMN =
+  "ALTER TABLE requests ADD COLUMN requires_system_access INTEGER";
