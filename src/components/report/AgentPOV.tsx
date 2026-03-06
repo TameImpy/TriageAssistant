@@ -9,6 +9,7 @@ interface AgentPOVProps {
   perspective: AgentPerspective;
   avatarColor?: string;
   avatarInitials?: string;
+  avatarEmoji?: string;
 }
 
 const stanceColors: Record<string, string> = {
@@ -26,15 +27,15 @@ function getStanceColor(stance: string): string {
   return "text-foreground";
 }
 
-export function AgentPOV({ perspective, avatarColor = "bg-slate-600", avatarInitials }: AgentPOVProps) {
-  const initials = avatarInitials ?? perspective.agentName.slice(0, 2).toUpperCase();
+export function AgentPOV({ perspective, avatarColor = "bg-slate-600", avatarInitials, avatarEmoji }: AgentPOVProps) {
+  const display = avatarEmoji ?? (avatarInitials ?? perspective.agentName.slice(0, 2).toUpperCase());
 
   return (
     <AccordionItem value={perspective.agentId} className="border rounded-lg px-4 mb-2">
       <AccordionTrigger className="hover:no-underline">
         <div className="flex items-center gap-3 text-left">
-          <div className={`flex-shrink-0 w-8 h-8 rounded-full ${avatarColor} flex items-center justify-center text-white text-xs font-bold`}>
-            {initials}
+          <div className={`flex-shrink-0 w-10 h-10 rounded-full ${avatarColor} flex items-center justify-center text-white font-bold ${avatarEmoji ? "text-lg" : "text-xs"}`}>
+            {display}
           </div>
           <div>
             <p className="font-semibold text-sm">{perspective.agentName}</p>

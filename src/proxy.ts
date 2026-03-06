@@ -1,38 +1,55 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PROTECTED_PATHS = ["/requests", "/api/requests", "/api/triage", "/api/agents"];
-const PUBLIC_API_PATHS = ["/api/auth", "/api/intake"];
+const PROTECTED_PATHS = ["/api/triage", "/api/agents"];
+const PUBLIC_API_PATHS = ["/api/auth", "/api/intake", "/api/requests"];
 
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Allow public paths
+  // Allow public API paths (includes POST /api/requests for employee submissions)
   if (PUBLIC_API_PATHS.some((p) => pathname.startsWith(p))) {
+    // Only protect GET /api/requests list and GET /api/requests/[id] for reviewers
+    if (pathname === "/api/requests" && req.method === "GET") {
+      return requireAuth(req);
+    }
+    if (pathname.match(/^\/api\/requests\/[^/]+$/) && req.method === "GET") {
+      return requireAuth(req);
+    }
     return NextResponse.next();
   }
 
-  // Allow employee-facing paths
+  // Allow employee-facing pages
   if (
     pathname === "/" ||
     pathname.startsWith("/submit") ||
+    pathname.startsWith("/login") ||
     pathname.match(/^\/requests\/[^/]+\/(status|clarify)/)
   ) {
     return NextResponse.next();
   }
 
-  // Protect reviewer paths
-  if (PROTECTED_PATHS.some((p) => pathname.startsWith(p))) {
-    const authCookie = req.cookies.get("auth")?.value;
-    const expectedPassword = process.env.AUTH_PASSWORD;
+  // Protect reviewer pages and remaining API routes
+  if (
+    pathname.startsWith("/requests") ||
+    PROTECTED_PATHS.some((p) => pathname.startsWith(p))
+  ) {
+    return requireAuth(req);
+  }
 
-    if (!expectedPassword || authCookie !== expectedPassword) {
-      if (pathname.startsWith("/api/")) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-      const loginUrl = new URL("/login", req.url);
-      loginUrl.searchParams.set("from", pathname);
-      return NextResponse.redirect(loginUrl);
+  return NextResponse.next();
+}
+
+function requireAuth(req: NextRequest) {
+  const authCookie = req.cookies.get("auth")?.value;
+  const expectedPassword = process.env.AUTH_PASSWORD;
+
+  if (!expectedPassword || authCookie !== expectedPassword) {
+    if (req.nextUrl.pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("from", req.nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();

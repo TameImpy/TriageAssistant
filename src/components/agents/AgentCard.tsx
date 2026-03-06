@@ -15,9 +15,9 @@ export function AgentCard({ agent, onClick }: AgentCardProps) {
       } ${!agent.enabled ? "opacity-50" : ""}`}
     >
       <div
-        className={`flex-shrink-0 w-10 h-10 rounded-full ${agent.persona.avatarColor} flex items-center justify-center text-white text-sm font-bold`}
+        className={`flex-shrink-0 w-12 h-12 rounded-full ${agent.persona.avatarColor} flex items-center justify-center text-white font-bold ${agent.persona.avatarEmoji ? "text-xl" : "text-sm"}`}
       >
-        {agent.persona.avatarInitials}
+        {agent.persona.avatarEmoji ?? agent.persona.avatarInitials}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">

@@ -40,12 +40,7 @@ export function ClarificationForm({ requestId, questions }: ClarificationFormPro
 
       const data = await res.json() as { ready: boolean };
 
-      if (data.ready) {
-        router.push(`/requests/${requestId}/status`);
-      } else {
-        // Second round — just go to status anyway
-        router.push(`/requests/${requestId}/status`);
-      }
+      router.push(`/requests/${requestId}/status`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
@@ -87,8 +82,19 @@ export function ClarificationForm({ requestId, questions }: ClarificationFormPro
         </div>
       )}
 
-      <Button type="submit" disabled={submitting} className="w-full">
-        {submitting ? "Saving…" : "Submit Answers"}
+      <Button type="submit" disabled={submitting} className="w-full h-12">
+        {submitting ? (
+          <span className="flex items-center justify-center gap-3">
+            <span className="flex gap-1">
+              <span className="w-2 h-2 rounded-full bg-primary-foreground animate-bounce [animation-delay:-0.3s]" />
+              <span className="w-2 h-2 rounded-full bg-primary-foreground animate-bounce [animation-delay:-0.15s]" />
+              <span className="w-2 h-2 rounded-full bg-primary-foreground animate-bounce" />
+            </span>
+            Processing request…
+          </span>
+        ) : (
+          "Submit Answers"
+        )}
       </Button>
     </form>
   );

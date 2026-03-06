@@ -9,6 +9,7 @@ interface AgentMessageProps {
   message: AgentMessageState;
   avatarColor?: string;
   avatarInitials?: string;
+  avatarEmoji?: string;
 }
 
 const phaseLabels: Record<number, string> = {
@@ -17,15 +18,22 @@ const phaseLabels: Record<number, string> = {
   4: "Synthesis",
 };
 
-export function AgentMessage({ message, avatarColor = "bg-slate-600", avatarInitials }: AgentMessageProps) {
-  const initials = avatarInitials ?? message.agentName.slice(0, 2).toUpperCase();
+export function AgentMessage({ message, avatarColor = "bg-slate-600", avatarInitials, avatarEmoji }: AgentMessageProps) {
+  const display = avatarEmoji ?? (avatarInitials ?? message.agentName.slice(0, 2).toUpperCase());
   const phaseLabel = phaseLabels[message.phase];
   const roundLabel = message.round ? `Round ${message.round}` : null;
+  const ringColor = avatarColor.replace("bg-", "ring-");
 
   return (
     <div className="flex gap-3 py-3">
-      <div className={`flex-shrink-0 w-9 h-9 rounded-full ${avatarColor} flex items-center justify-center text-white text-xs font-bold`}>
-        {initials}
+      <div
+        className={`flex-shrink-0 w-12 h-12 rounded-full ${avatarColor} flex items-center justify-center text-white font-bold transition-shadow ${
+          message.isStreaming
+            ? `ring-2 ring-offset-2 ${ringColor} animate-pulse`
+            : ""
+        } ${avatarEmoji ? "text-xl" : "text-xs"}`}
+      >
+        {display}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">

@@ -35,18 +35,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Request not found" }, { status: 404 });
     }
 
-    // If answers provided, save them first
+    // If answers are being submitted, this is the clarification round completing.
+    // Always mark ready after one round — no second loop.
     if (answers && answers.length > 0) {
       const existingAnswers: IntakeAnswer[] = request.intake_answers ?? [];
-      const merged = [...existingAnswers, ...answers];
-      await updateRequest(requestId, { intake_answers: merged });
+      await updateRequest(requestId, {
+        intake_answers: [...existingAnswers, ...answers],
+        intake_ready: true,
+        status: "in_progress",
+      });
+      return NextResponse.json({ ready: true, questions: [] });
     }
 
-    // Re-fetch with updated answers
-    const updatedRequest = getRequest(requestId)!;
-
-    // Run intake agent
-    const result = await runIntakeAgent(updatedRequest);
+    // Initial submission — run the intake agent to decide if questions are needed
+    const result = await runIntakeAgent(request);
 
     if (result.ready || result.questions.length === 0) {
       await updateRequest(requestId, {
@@ -56,7 +58,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ready: true, questions: [] });
     }
 
-    // Save questions and set status
+    // First (and only) round of questions
     await updateRequest(requestId, {
       intake_questions: result.questions,
       status: "awaiting_clarification",

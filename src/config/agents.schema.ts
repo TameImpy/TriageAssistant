@@ -5,6 +5,7 @@ export const AgentPersonaSchema = z.object({
   description: z.string().min(1),
   avatarColor: z.string().min(1),
   avatarInitials: z.string().min(1).max(3),
+  avatarEmoji: z.string().optional(),
 });
 
 export const AgentStanceSchema = z.object({

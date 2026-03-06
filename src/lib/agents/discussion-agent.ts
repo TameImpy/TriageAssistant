@@ -12,6 +12,12 @@ import type { SSEEvent } from "@/lib/streaming/events";
 
 const client = new Anthropic();
 
+const INTER_AGENT_DELAY_MS = 3000;
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function buildRoundPrompt(round: number, allAnalyses: AgentAnalysisResult[]): string {
   const analysisSummary = allAnalyses
     .map(
@@ -42,7 +48,14 @@ export async function* runDiscussionRound(
   const requestContext = buildRequestContext(request);
   const roundPrompt = buildRoundPrompt(round, allAnalyses);
 
-  for (const agent of orderedAgents) {
+  for (let i = 0; i < orderedAgents.length; i++) {
+    const agent = orderedAgents[i];
+
+    // Pause between agents to avoid hitting token-per-minute rate limits
+    if (i > 0) {
+      await sleep(INTER_AGENT_DELAY_MS);
+    }
+
     yield {
       type: "agent_start",
       agentId: agent.id,
@@ -80,8 +93,7 @@ export async function* runDiscussionRound(
         }
       }
     } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : "Unknown error";
+      const errorMsg = err instanceof Error ? err.message : "Unknown error";
       fullContent = `[Agent encountered an error during discussion: ${errorMsg}]`;
       yield {
         type: "agent_token",
@@ -90,7 +102,6 @@ export async function* runDiscussionRound(
       };
     }
 
-    // Save message to DB and emit complete event
     const { saveMessage } = await import("@/lib/db/messages");
     const saved = saveMessage({
       request_id: request.id,
@@ -102,7 +113,6 @@ export async function* runDiscussionRound(
       model_used: agent.model,
     });
 
-    // Add to prior messages for next agent
     priorMessages.push(saved);
 
     yield {

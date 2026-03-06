@@ -1,22 +1,18 @@
 import type { RequestRecord } from "@/types/request";
 import type { SSEEvent } from "@/lib/streaming/events";
-import type { MessageRecord } from "@/types/message";
 import { loadEnabledAgents } from "@/lib/config/agent-loader";
 import { runParallelAnalysis } from "./analysis-agent";
-import { runDiscussionRound } from "./discussion-agent";
 import { runSynthesisAgent } from "./synthesis-agent";
 import { saveMessage } from "@/lib/db/messages";
 import { updateRequest } from "@/lib/db/requests";
 
-const TRIAGE_TIMEOUT_MS = 3 * 60 * 1000; // 3 minutes
+const TRIAGE_TIMEOUT_MS = 3 * 60 * 1000;
 
 export async function* runOrchestrator(
   request: RequestRecord
 ): AsyncGenerator<SSEEvent> {
   const agents = loadEnabledAgents();
-  const discussionMessages: MessageRecord[] = [];
 
-  // Store config snapshot
   await updateRequest(request.id, {
     agents_config_snapshot: JSON.stringify(agents),
   });
@@ -24,7 +20,6 @@ export async function* runOrchestrator(
   // --- PHASE 2: Independent Analysis ---
   yield { type: "phase_start", phase: 2, label: "Independent Analysis" };
 
-  // Emit agent_start for each agent (analysis is parallel, not streaming)
   for (const agent of agents) {
     yield {
       type: "agent_start",
@@ -36,7 +31,6 @@ export async function* runOrchestrator(
 
   const allAnalyses = await runParallelAnalysis(agents, request);
 
-  // Save analysis messages and emit complete events
   for (const result of allAnalyses) {
     const saved = saveMessage({
       request_id: request.id,
@@ -58,49 +52,7 @@ export async function* runOrchestrator(
 
   yield { type: "phase_complete", phase: 2 };
 
-  // --- PHASE 3: Structured Discussion ---
-  yield { type: "phase_start", phase: 3, label: "Structured Discussion" };
-
-  // Round 1
-  for await (const event of runDiscussionRound(
-    agents,
-    request,
-    allAnalyses,
-    discussionMessages,
-    1
-  )) {
-    yield event;
-    // Track messages added during discussion
-    if (event.type === "agent_complete") {
-      // Messages are already saved in runDiscussionRound; rebuild from DB
-      const { getMessagesByRequest } = await import("@/lib/db/messages");
-      const allMsgs = getMessagesByRequest(request.id);
-      // Update discussionMessages with phase 3 messages only
-      const phase3Msgs = allMsgs.filter((m) => m.phase === 3);
-      discussionMessages.splice(0, discussionMessages.length, ...phase3Msgs);
-    }
-  }
-
-  // Round 2
-  for await (const event of runDiscussionRound(
-    agents,
-    request,
-    allAnalyses,
-    discussionMessages,
-    2
-  )) {
-    yield event;
-    if (event.type === "agent_complete") {
-      const { getMessagesByRequest } = await import("@/lib/db/messages");
-      const allMsgs = getMessagesByRequest(request.id);
-      const phase3Msgs = allMsgs.filter((m) => m.phase === 3);
-      discussionMessages.splice(0, discussionMessages.length, ...phase3Msgs);
-    }
-  }
-
-  yield { type: "phase_complete", phase: 3 };
-
-  // --- PHASE 4: Synthesis ---
+  // --- PHASE 4: Synthesis (directly from Phase 2 analyses) ---
   yield { type: "phase_start", phase: 4, label: "Generating Final Report" };
 
   yield {
@@ -110,19 +62,8 @@ export async function* runOrchestrator(
     phase: 4,
   };
 
-  const { getMessagesByRequest } = await import("@/lib/db/messages");
-  const finalDiscussionMessages = getMessagesByRequest(request.id).filter(
-    (m) => m.phase === 3
-  );
+  const report = await runSynthesisAgent(request, agents, allAnalyses);
 
-  const report = await runSynthesisAgent(
-    request,
-    agents,
-    allAnalyses,
-    finalDiscussionMessages
-  );
-
-  // Save synthesis message
   const synthesisSaved = saveMessage({
     request_id: request.id,
     phase: 4,
@@ -138,7 +79,6 @@ export async function* runOrchestrator(
     messageId: synthesisSaved.id,
   };
 
-  // Update request with final report
   await updateRequest(request.id, {
     status: "complete",
     final_report: report,

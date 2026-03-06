@@ -109,6 +109,7 @@ export function FinalReport({ report, request, messages = [], agentConfigs = [] 
                   perspective={perspective}
                   avatarColor={config?.persona.avatarColor}
                   avatarInitials={config?.persona.avatarInitials}
+                  avatarEmoji={config?.persona.avatarEmoji}
                 />
               );
             })}

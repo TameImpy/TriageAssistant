@@ -15,21 +15,15 @@ export async function POST(
     return NextResponse.json({ error: "Request not found" }, { status: 404 });
   }
 
-  if (request.status === "in_progress") {
-    return NextResponse.json(
-      { error: "Triage already in progress" },
-      { status: 409 }
-    );
-  }
-
-  if (request.status === "complete") {
+  // Only block if a clean complete run already exists
+  if (request.status === "complete" && request.final_report) {
     return NextResponse.json(
       { error: "Triage already complete" },
       { status: 409 }
     );
   }
 
-  // Mark as in_progress
+  // Reset status for stuck or errored runs so they can be retried
   await updateRequest(requestId, { status: "in_progress" });
 
   const updatedRequest = getRequest(requestId)!;
@@ -40,16 +34,7 @@ export async function POST(
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error during triage";
       console.error("Orchestrator error:", err);
-
-      // Update status to error
       await updateRequest(requestId, { status: "error" });
-
-      const encoder = new TextEncoder();
-      const errorEvent = formatSSEEvent({
-        type: "error",
-        message,
-        recoverable: false,
-      });
       yield {
         type: "error" as const,
         message,

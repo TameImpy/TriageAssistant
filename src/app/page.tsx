@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -7,8 +8,16 @@ export default function Home() {
     <main className="min-h-screen bg-background flex flex-col items-center justify-center p-8">
       <div className="max-w-2xl w-full space-y-8">
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-2">
-            AI Triage Assistant
+          <div className="flex justify-center mb-4">
+            <div className="rounded-2xl overflow-hidden inline-block">
+              <Image
+                src="/logo.png"
+                alt="Immediate, a Burda company"
+                width={320}
+                height={88}
+                priority
+              />
+            </div>
           </div>
           <h1 className="text-4xl font-bold tracking-tight">
             Request access to an AI tool

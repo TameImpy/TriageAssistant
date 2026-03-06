@@ -58,6 +58,7 @@ export function DiscussionFeed({ agentConfigs = [] }: DiscussionFeedProps) {
         message={message}
         avatarColor={config?.persona.avatarColor}
         avatarInitials={config?.persona.avatarInitials}
+        avatarEmoji={config?.persona.avatarEmoji}
       />
     );
   }
@@ -68,8 +69,10 @@ export function DiscussionFeed({ agentConfigs = [] }: DiscussionFeedProps) {
       {activeAgentId && (
         <TypingIndicator
           agentName={activeAgent?.name ?? activeAgentId}
+          agentTitle={activeAgent?.persona.title}
           avatarColor={activeAgent?.persona.avatarColor}
           avatarInitials={activeAgent?.persona.avatarInitials}
+          avatarEmoji={activeAgent?.persona.avatarEmoji}
         />
       )}
       <div ref={bottomRef} />
