@@ -7,6 +7,9 @@ import {
   CREATE_APPROVED_TOOLS_TABLE,
   CREATE_CATALOGUE_REQUESTS_TABLE,
   ADD_REQUIRES_SYSTEM_ACCESS_COLUMN,
+  ADD_MESSAGES_INPUT_TOKENS_COLUMN,
+  ADD_MESSAGES_OUTPUT_TOKENS_COLUMN,
+  ADD_REQUESTS_TOTAL_COST_COLUMN,
 } from "./schema";
 
 let migrated = false;
@@ -25,6 +28,10 @@ export function runMigrations(): void {
   } catch {
     // column already exists
   }
+
+  try { db.exec(ADD_MESSAGES_INPUT_TOKENS_COLUMN); } catch { /* already exists */ }
+  try { db.exec(ADD_MESSAGES_OUTPUT_TOKENS_COLUMN); } catch { /* already exists */ }
+  try { db.exec(ADD_REQUESTS_TOTAL_COST_COLUMN); } catch { /* already exists */ }
 
   // Seed approved tools if none exist
   const count = (

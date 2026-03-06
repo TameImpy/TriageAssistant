@@ -12,6 +12,8 @@ export interface MessageRecord {
   structured_data: AgentAnalysis | null;
   token_count: number | null;
   model_used: string | null;
+  input_tokens: number | null;
+  output_tokens: number | null;
 }
 
 export interface SaveMessageInput {
@@ -24,4 +26,6 @@ export interface SaveMessageInput {
   structured_data?: AgentAnalysis | null;
   token_count?: number | null;
   model_used?: string | null;
+  input_tokens?: number | null;
+  output_tokens?: number | null;
 }

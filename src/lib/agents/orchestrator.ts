@@ -1,10 +1,11 @@
 import type { RequestRecord } from "@/types/request";
 import type { SSEEvent } from "@/lib/streaming/events";
 import { loadEnabledAgents } from "@/lib/config/agent-loader";
-import { runParallelAnalysis } from "./analysis-agent";
+import { runSingleAnalysis, type AgentAnalysisResult } from "./analysis-agent";
 import { runSynthesisAgent } from "./synthesis-agent";
 import { saveMessage } from "@/lib/db/messages";
 import { updateRequest } from "@/lib/db/requests";
+import { calculateMessageCost } from "@/lib/utils/cost";
 
 const TRIAGE_TIMEOUT_MS = 3 * 60 * 1000;
 
@@ -20,6 +21,9 @@ export async function* runOrchestrator(
   // --- PHASE 2: Independent Analysis ---
   yield { type: "phase_start", phase: 2, label: "Independent Analysis" };
 
+  const allAnalyses: AgentAnalysisResult[] = [];
+  let totalCostUsd = 0;
+
   for (const agent of agents) {
     yield {
       type: "agent_start",
@@ -27,11 +31,11 @@ export async function* runOrchestrator(
       agentName: agent.name,
       phase: 2,
     };
-  }
 
-  const allAnalyses = await runParallelAnalysis(agents, request);
+    const result = await runSingleAnalysis(agent, request);
+    allAnalyses.push(result);
+    totalCostUsd += calculateMessageCost(agent.model, result.inputTokens, result.outputTokens);
 
-  for (const result of allAnalyses) {
     const saved = saveMessage({
       request_id: request.id,
       phase: 2,
@@ -39,7 +43,9 @@ export async function* runOrchestrator(
       agent_name: result.agentName,
       content: result.analysis.summary,
       structured_data: result.analysis,
-      model_used: agents.find((a) => a.id === result.agentId)?.model ?? null,
+      model_used: agent.model,
+      input_tokens: result.inputTokens,
+      output_tokens: result.outputTokens,
     });
 
     yield {
@@ -48,6 +54,8 @@ export async function* runOrchestrator(
       messageId: saved.id,
       structuredData: result.analysis,
     };
+
+    await new Promise((r) => setTimeout(r, 400));
   }
 
   yield { type: "phase_complete", phase: 2 };
@@ -62,7 +70,9 @@ export async function* runOrchestrator(
     phase: 4,
   };
 
-  const report = await runSynthesisAgent(request, agents, allAnalyses);
+  const { report, inputTokens: synthIn, outputTokens: synthOut } =
+    await runSynthesisAgent(request, agents, allAnalyses);
+  totalCostUsd += calculateMessageCost("claude-opus-4-6", synthIn, synthOut);
 
   const synthesisSaved = saveMessage({
     request_id: request.id,
@@ -71,6 +81,8 @@ export async function* runOrchestrator(
     agent_name: "Synthesis Agent",
     content: report.executiveSummary,
     model_used: "claude-opus-4-6",
+    input_tokens: synthIn,
+    output_tokens: synthOut,
   });
 
   yield {
@@ -84,6 +96,7 @@ export async function* runOrchestrator(
     final_report: report,
     recommendation: report.recommendation,
     risk_level: report.riskLevel,
+    total_cost_usd: totalCostUsd,
   });
 
   yield { type: "phase_complete", phase: 4 };

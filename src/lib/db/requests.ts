@@ -47,6 +47,7 @@ function toRecord(row: Record<string, unknown>): RequestRecord {
     recommendation: row.recommendation as Recommendation | null,
     risk_level: row.risk_level as RiskLevel | null,
     agents_config_snapshot: row.agents_config_snapshot as string | null,
+    total_cost_usd: row.total_cost_usd as number | null,
   };
 }
 
@@ -126,6 +127,7 @@ export interface UpdateRequestInput {
   recommendation?: Recommendation | null;
   risk_level?: RiskLevel | null;
   agents_config_snapshot?: string | null;
+  total_cost_usd?: number | null;
 }
 
 export function updateRequest(
@@ -176,6 +178,10 @@ export function updateRequest(
   if (updates.agents_config_snapshot !== undefined) {
     fields.push("agents_config_snapshot = ?");
     values.push(updates.agents_config_snapshot);
+  }
+  if (updates.total_cost_usd !== undefined) {
+    fields.push("total_cost_usd = ?");
+    values.push(updates.total_cost_usd);
   }
 
   values.push(id);

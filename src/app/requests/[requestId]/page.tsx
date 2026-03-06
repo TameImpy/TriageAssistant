@@ -15,6 +15,7 @@ import type { MessageRecord } from "@/types/message";
 import type { AgentConfig } from "@/config/agents.schema";
 import type { FinalReport as FinalReportType } from "@/types/report";
 import Link from "next/link";
+import { formatCostUsd } from "@/lib/utils/cost";
 
 interface FullRequest extends RequestRecord {
   messages: MessageRecord[];
@@ -152,6 +153,12 @@ export default function RequestDetailPage() {
                 <dt className="text-xs text-muted-foreground">Data Types</dt>
                 <dd>{request.data_types.join(", ")}</dd>
               </div>
+              {request.total_cost_usd !== null && (
+                <div>
+                  <dt className="text-xs text-muted-foreground">Triage Cost</dt>
+                  <dd>{formatCostUsd(request.total_cost_usd)}</dd>
+                </div>
+              )}
               <div className="col-span-2">
                 <dt className="text-xs text-muted-foreground">Justification</dt>
                 <dd className="mt-1 text-foreground/80">{request.business_justification}</dd>

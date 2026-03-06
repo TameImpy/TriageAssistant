@@ -19,6 +19,8 @@ function toRecord(row: Record<string, unknown>): MessageRecord {
       : null,
     token_count: row.token_count as number | null,
     model_used: row.model_used as string | null,
+    input_tokens: row.input_tokens as number | null,
+    output_tokens: row.output_tokens as number | null,
   };
 }
 
@@ -31,8 +33,9 @@ export function saveMessage(input: SaveMessageInput): MessageRecord {
   db.prepare(
     `INSERT INTO messages (
       id, request_id, created_at, phase, round,
-      agent_id, agent_name, content, structured_data, token_count, model_used
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      agent_id, agent_name, content, structured_data, token_count, model_used,
+      input_tokens, output_tokens
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
     id,
     input.request_id,
@@ -44,7 +47,9 @@ export function saveMessage(input: SaveMessageInput): MessageRecord {
     input.content,
     input.structured_data ? JSON.stringify(input.structured_data) : null,
     input.token_count ?? null,
-    input.model_used ?? null
+    input.model_used ?? null,
+    input.input_tokens ?? null,
+    input.output_tokens ?? null
   );
 
   return getMessagesByRequest(input.request_id).find((m) => m.id === id)!;

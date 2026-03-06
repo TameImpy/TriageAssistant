@@ -77,6 +77,7 @@ export async function GET() {
         created_at: r.created_at,
         intake_ready: r.intake_ready,
         requires_system_access: r.requires_system_access,
+        total_cost_usd: r.total_cost_usd,
       }))
     );
   } catch (err) {

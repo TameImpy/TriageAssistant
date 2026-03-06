@@ -84,3 +84,10 @@ export const CREATE_CATALOGUE_REQUESTS_TABLE = `
 
 export const ADD_REQUIRES_SYSTEM_ACCESS_COLUMN =
   "ALTER TABLE requests ADD COLUMN requires_system_access INTEGER";
+
+export const ADD_MESSAGES_INPUT_TOKENS_COLUMN =
+  "ALTER TABLE messages ADD COLUMN input_tokens INTEGER";
+export const ADD_MESSAGES_OUTPUT_TOKENS_COLUMN =
+  "ALTER TABLE messages ADD COLUMN output_tokens INTEGER";
+export const ADD_REQUESTS_TOTAL_COST_COLUMN =
+  "ALTER TABLE requests ADD COLUMN total_cost_usd REAL";

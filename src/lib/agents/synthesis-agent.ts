@@ -78,11 +78,17 @@ Rules:
 - generatedAt should be the current timestamp`;
 }
 
+export interface SynthesisResult {
+  report: FinalReport;
+  inputTokens: number;
+  outputTokens: number;
+}
+
 export async function runSynthesisAgent(
   request: RequestRecord,
   agents: AgentConfig[],
   allAnalyses: AgentAnalysisResult[]
-): Promise<FinalReport> {
+): Promise<SynthesisResult> {
   const prompt = buildSynthesisPrompt(request, agents, allAnalyses);
 
   const response = await client.messages.create({
@@ -106,5 +112,9 @@ export async function runSynthesisAgent(
     report.generatedAt = new Date().toISOString();
   }
 
-  return report;
+  return {
+    report,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+  };
 }

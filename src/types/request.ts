@@ -40,6 +40,7 @@ export interface RequestRecord {
   recommendation: Recommendation | null;
   risk_level: RiskLevel | null;
   agents_config_snapshot: string | null;
+  total_cost_usd: number | null;
 }
 
 export interface CreateRequestInput {

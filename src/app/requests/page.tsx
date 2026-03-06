@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { RequestStatus, RiskLevel, Recommendation } from "@/types/request";
+import { formatCostUsd } from "@/lib/utils/cost";
 
 interface RequestSummary {
   id: string;
@@ -28,6 +29,7 @@ interface RequestSummary {
   created_at: number;
   intake_ready: boolean;
   requires_system_access: boolean | null;
+  total_cost_usd: number | null;
 }
 
 const statusStyles: Record<RequestStatus, string> = {
@@ -240,6 +242,12 @@ export default function RequestsPage() {
                         {request.requester_team}
                         <span className="mx-1.5 text-muted-foreground/40">·</span>
                         {formatDate(request.created_at)}
+                        {request.total_cost_usd !== null && request.status === "complete" && (
+                          <>
+                            <span className="mx-1.5 text-muted-foreground/40">·</span>
+                            <span className="text-muted-foreground">{formatCostUsd(request.total_cost_usd)}</span>
+                          </>
+                        )}
                       </p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0 group-hover:text-muted-foreground transition-colors" />
