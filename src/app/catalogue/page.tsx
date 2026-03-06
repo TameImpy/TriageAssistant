@@ -13,24 +13,21 @@ function getLogoUrl(vendorUrl: string | null): string | null {
   if (!vendorUrl) return null;
   try {
     const { hostname } = new URL(vendorUrl);
-    return `https://logo.clearbit.com/${hostname}`;
+    return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
   } catch {
     return null;
   }
 }
 
 function ToolLogo({ url }: { url: string }) {
-  const [visible, setVisible] = useState(true);
-  if (!visible) return null;
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={url}
       alt=""
-      width={36}
-      height={36}
-      className="rounded-lg object-contain bg-white border border-border/50 p-0.5"
-      onError={() => setVisible(false)}
+      width={32}
+      height={32}
+      className="rounded-md object-contain"
     />
   );
 }
