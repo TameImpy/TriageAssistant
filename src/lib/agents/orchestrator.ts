@@ -60,14 +60,14 @@ export async function* runOrchestrator(
 
   yield { type: "phase_complete", phase: 2 };
 
-  // --- PHASE 4: Synthesis (directly from Phase 2 analyses) ---
-  yield { type: "phase_start", phase: 4, label: "Generating Final Report" };
+  // --- PHASE 3: Synthesis (directly from Phase 2 analyses) ---
+  yield { type: "phase_start", phase: 3, label: "Generating Final Report" };
 
   yield {
     type: "agent_start",
     agentId: "synthesis",
     agentName: "Synthesis Agent",
-    phase: 4,
+    phase: 3,
   };
 
   const { report, inputTokens: synthIn, outputTokens: synthOut } =
@@ -99,7 +99,7 @@ export async function* runOrchestrator(
     total_cost_usd: totalCostUsd,
   });
 
-  yield { type: "phase_complete", phase: 4 };
+  yield { type: "phase_complete", phase: 3 };
   yield { type: "report_ready", report };
 }
 

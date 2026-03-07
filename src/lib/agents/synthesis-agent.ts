@@ -21,7 +21,7 @@ function buildSynthesisPrompt(
   const analysisSummary = allAnalyses
     .map((a) => {
       const agent = agents.find((ag) => ag.id === a.agentId);
-      return `**${a.agentName}** (Vote weight: ${agent?.voteWeight ?? 1.0}, Risk score: ${a.analysis.risk_score}/10)
+      return `**${a.agentName}** (agentId: ${a.agentId}, Vote weight: ${agent?.voteWeight ?? 1.0}, Risk score: ${a.analysis.risk_score}/10)
 Stance: ${a.analysis.stance}
 Concerns: ${a.analysis.concerns.join("; ")}
 Questions raised: ${a.analysis.questions_for_peers.join("; ") || "None"}`;

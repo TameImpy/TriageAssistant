@@ -12,9 +12,9 @@ const severityColors: Record<string, string> = {
 };
 
 const likelihoodColors: Record<string, string> = {
-  low: "text-green-700",
-  medium: "text-amber-700",
-  high: "text-orange-700",
+  low: "text-green-700 bg-green-50",
+  medium: "text-amber-700 bg-amber-50",
+  high: "text-orange-700 bg-orange-50",
 };
 
 export function RiskMatrix({ risks }: RiskMatrixProps) {
@@ -42,8 +42,10 @@ export function RiskMatrix({ risks }: RiskMatrixProps) {
                   {risk.severity}
                 </span>
               </td>
-              <td className={`py-2.5 pr-4 font-medium ${likelihoodColors[risk.likelihood] ?? ""}`}>
-                {risk.likelihood}
+              <td className="py-2.5 pr-4">
+                <span className={`px-2 py-0.5 rounded text-xs font-medium ${likelihoodColors[risk.likelihood] ?? ""}`}>
+                  {risk.likelihood}
+                </span>
               </td>
               <td className="py-2.5 text-foreground/80">{risk.mitigation}</td>
             </tr>

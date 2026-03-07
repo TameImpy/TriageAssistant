@@ -14,8 +14,7 @@ interface AgentMessageProps {
 
 const phaseLabels: Record<number, string> = {
   2: "Analysis",
-  3: "Discussion",
-  4: "Synthesis",
+  3: "Synthesis",
 };
 
 export function AgentMessage({ message, avatarColor = "bg-slate-600", avatarInitials, avatarEmoji }: AgentMessageProps) {

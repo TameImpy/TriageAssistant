@@ -51,6 +51,10 @@ export function DiscussionFeed({ agentConfigs = [] }: DiscussionFeedProps) {
       }
     }
 
+    // Skip the placeholder message created on agent_start before any content arrives
+    // — the TypingIndicator already handles this "thinking" state visually
+    if (message.isStreaming && message.content === "") continue;
+
     const config = getAgentConfig(message.agentId);
     items.push(
       <AgentMessage
@@ -65,6 +69,7 @@ export function DiscussionFeed({ agentConfigs = [] }: DiscussionFeedProps) {
 
   return (
     <div className="space-y-1">
+      <PhaseHeader phase={1} label="Initial Request Capture" complete={true} />
       {items}
       {activeAgentId && (
         <TypingIndicator

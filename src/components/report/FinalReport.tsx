@@ -25,8 +25,11 @@ export function FinalReport({ report, request, messages = [], agentConfigs = [] 
     navigator.clipboard.writeText(text);
   }
 
-  function getAgentConfig(agentId: string) {
-    return agentConfigs.find((a) => a.id === agentId);
+  function getAgentConfig(agentId: string, agentName?: string) {
+    return (
+      agentConfigs.find((a) => a.id === agentId) ??
+      (agentName ? agentConfigs.find((a) => a.name.toLowerCase() === agentName.toLowerCase()) : undefined)
+    );
   }
 
   return (
@@ -102,7 +105,7 @@ export function FinalReport({ report, request, messages = [], agentConfigs = [] 
           </h3>
           <Accordion type="multiple">
             {report.agentPerspectives.map((perspective) => {
-              const config = getAgentConfig(perspective.agentId);
+              const config = getAgentConfig(perspective.agentId, perspective.agentName);
               return (
                 <AgentPOV
                   key={perspective.agentId}
